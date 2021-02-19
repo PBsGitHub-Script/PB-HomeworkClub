@@ -24,7 +24,10 @@ touch homework2_script.txt
 open homework2_script.txt #writing the Homework2_Script here
 git status
 git add homework2_script.txt
-git commit -m "homework2 is finally here. Phew!"
+git status
+git commit -m "homework2 is finally here. Phew."
+git push origin main
+
 
 
 
