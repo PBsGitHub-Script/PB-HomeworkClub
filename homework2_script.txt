@@ -10,12 +10,13 @@
 pwd
 /Users/pankajbhatta
 cd Desktop
-git clone https://github.com/PBsGitHub-Script/PB-HomeworkClub.git #url for the repository was copied from the GitHub 
+git clone https://github.com/PBsGitHub-Script/PB-HomeworkClub.git #url for the repository was copied from the GitHub. 
+								  #This command clones our repository directory in the path we want it. In my case, it is in 								           the desktop
 touch Homework1.doc #new doc file for homework1 was created  
 open Homework1.doc #opened the doc and texts for homework was added from the old file
 git status #checked the status to see that there's a file in the directory that Git isn't keeping track of
 git add . #this command is to tell git to keep track of all the added files to the directory. 
-		  #you can also use the the command "git add Homework.doc" to add just one file
+	  #you can also use the the command "git add Homework.doc" to add just one file
 git status #now you wil see that git started keeping track  of your files, but t hasn’t recorded these changes as a commit yet
 git commit -m "homework1 is here" #now the commit has been added to the changes
 git push origin main #this command will push all our codes and texts to our file in the directory to the repository
