@@ -1,0 +1,255 @@
+---
+title: "CarrotTransformation"
+author: "Pankaj Bhatta"
+date: "04/05/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Necessary items:
+- **libraries:** tidyverse, ggsci, ggforce, patchwork, Hmisc
+- **files:** carrot_df.csv
+
+Within RStudio you can directly edit these blocks of code and turn in your homework that way with your code and figures printed.   
+I **HIGHLY** recommend getting your code to work in a normal R script then just copy and pasting the final code over to this document
+
+**First: import libraries, set your working directory, and read in bloom_df** 
+
+```{r init, message=FALSE, warning=FALSE}
+library(tidyverse) 
+library(ggforce) 
+library(ggsci)
+library(patchwork)
+library(Hmisc)
+setwd('~/Desktop/BIOL792_2') #change to match your ggplot directory
+carrot_df <- read.csv('carrot_transformation_version2-1.csv')
+```
+### carrot_df contents
+- **carrot_variety**
+- **carrot_parts** 
+- **agrobacteria_type**  
+- **gene**  
+- **conditions**  
+- **time_in_MS1D_dark**  
+- **time_in_MS1D_dl**  
+- **time_in_half_MS1D_dl**  
+- **time_in_quarter_MS1D_dl**  
+- **antibiotics_in_MS1D_dl**  
+- **antibiotics_in_half_MS1D_dl**  
+- **antibiotics_in_qaurter_MS1D_dl**  
+- **callus_status**  
+- **PCR_Gel_status**  
+- **GC_MS_polyacetylene_percentage** 
+
+Let's take a peak and look at the structure
+
+```{r carrot_df}
+carrot_df[sample(nrow(carrot_df), 5), ]
+summary(carrot_df)
+```
+##### We are creating ggplot of the following data for the visualization.
+##### The layout will be: 
+- x axis: carrot_variety/carrot_parts/agrobacteria_type/gene  
+- y axis: value of GC_MS_polyacetylene_percentage 
+
+##### We are creating two plots for visualization:  
+- bar and error bars (mean and 95% conf. int.)  
+- raw data + point and error bars (mean and 95% conf. int.)  
+```{r carrot_long_df}
+carrot_long_df <- carrot_df %>%
+  gather(key=polyacetylene, value = mean, c(GC_MS_polyacetylene_percentage))
+```
+
+#### Calculation and summarization of polyacetylene based on carrot_variety
+
+```{r 1.1}
+variety_polyacetylene_sum_df <- carrot_df %>%
+  group_by(carrot_variety) %>%
+  summarise(mean = mean(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            sd = sd(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            n = n()) %>%
+  mutate(se = sd / sqrt(n),
+         ci = 1.96*se)
+variety_polyacetylene_sum_df
+```
+#### Bar and error bars (mean and 95% conf. int.)
+
+```{r 1.2}
+carrot_variety_bar <- ggplot(data=variety_polyacetylene_sum_df, aes(x=carrot_variety, y=mean, fill= carrot_variety))+
+  geom_bar(stat = 'identity')+
+  geom_errorbar(aes(ymin = mean - ci, ymax = mean + ci))+
+  xlab('Carrot variety')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene mean on carrot variety')
+  
+carrot_variety_bar
+```
+#### Raw data + point and error bars (mean and 95% conf. int.)
+
+```{r 1.3}
+carrot_variety_plots = ggplot(data=carrot_long_df, aes(x=carrot_variety, y=mean, colour=carrot_variety))+
+  geom_point(size=1)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color='black')+
+  stat_summary(fun = mean, geom = "point", size=3, color='black')+
+  xlab('Carrot variety')+
+  ylab('Polyacetylene')+
+  ggtitle('Polyacetylene vs carrot variety')
+
+carrot_variety_plots
+```
+
+####calculation and summarization of polyacetylene based on carrot_parts
+
+```{r 2.1}
+parts_polyacetylene_sum_df <- carrot_df %>%
+  group_by(carrot_parts) %>%
+  summarise(mean = mean(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            sd = sd(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            n = n()) %>%
+  mutate(se = sd / sqrt(n),
+         ci = 1.96*se)
+parts_polyacetylene_sum_df
+```
+
+#### Bar and error bars (mean and 95% conf. int.)
+
+```{r 2.2}
+carrot_parts_bar <- ggplot(data=parts_polyacetylene_sum_df, aes(x=carrot_parts, y=mean, fill= carrot_parts))+
+  geom_bar(stat = 'identity')+
+  geom_errorbar(aes(ymin = mean - ci, ymax = mean + ci))+
+  xlab('Carrot parts')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene mean on carrot parts')
+carrot_parts_bar
+```
+
+#### Raw data + point and error bars (mean and 95% conf. int.)
+
+```{r 2.3}
+carrot_parts_plots = ggplot(data=carrot_long_df, aes(x=carrot_parts, y=mean, colour=carrot_parts))+
+  geom_point(size=1)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color='black')+
+  stat_summary(fun = mean, geom = "point", size=3, color='black')+
+  xlab('Carrot parts')+
+  ylab('Polyacetylene')+
+  ggtitle('Polyacetylene vs carrot parts')
+
+carrot_parts_plots
+```
+
+#### Calculation and summarization of polyacetylene based on agrobacteria_type
+
+```{r 3.1}
+agrobacteria_polyacetylene_sum_df <- carrot_df %>%
+  group_by(agrobacteria_type) %>%
+  summarise(mean = mean(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            sd = sd(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            n = n()) %>%
+  mutate(se = sd / sqrt(n),
+         ci = 1.96*se)
+agrobacteria_polyacetylene_sum_df
+```
+#### Bar and error bars (mean and 95% conf. int.)
+
+```{r 3.2}
+agrobacteria_bar <- ggplot(data=agrobacteria_polyacetylene_sum_df, aes(x=agrobacteria_type, y=mean, fill= agrobacteria_type))+
+  geom_bar(stat = 'identity')+
+  geom_errorbar(aes(ymin = mean - ci, ymax = mean + ci))+
+  xlab('Agrobacteria type')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene mean on Agrobacteria type')
+  
+agrobacteria_bar
+```
+#### Raw data + point and error bars (mean and 95% conf. int.)
+
+```{r 3.3}
+agrobacteria_plots = ggplot(data=carrot_long_df, aes(x=agrobacteria_type, y=mean, colour=agrobacteria_type))+
+  geom_point(size=1)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color='black')+
+  stat_summary(fun = mean, geom = "point", size=3, color='black')+
+  xlab('Agrobacteria type')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene vs Agrobacteria type')
+
+agrobacteria_plots
+```
+
+#### Calculation and summarization of polyacetylene based on gene
+
+```{r 4.1}
+gene_polyacetylene_sum_df <- carrot_df %>%
+  group_by(gene) %>%
+  summarise(mean = mean(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            sd = sd(GC_MS_polyacetylene_percentage, na.rm= TRUE),
+            n = n()) %>%
+  mutate(se = sd / sqrt(n),
+         ci = 1.96*se)
+gene_polyacetylene_sum_df
+```
+#### Bar and error bars (mean and 95% conf. int.)
+
+```{r 4.2}
+gene_bar <- ggplot(data=gene_polyacetylene_sum_df, aes(x=gene, y=mean, fill= gene))+
+  geom_bar(stat = 'identity')+
+  geom_errorbar(aes(ymin = mean - ci, ymax = mean + ci))+
+  xlab('Gene')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene mean on Gene')
+  
+gene_bar
+```
+#### Raw data + point and error bars (mean and 95% conf. int.)
+
+```{r 4.3}
+gene_plots = ggplot(data=carrot_long_df, aes(x=gene, y=mean, colour=gene))+
+  geom_point(size=1)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color='black')+
+  stat_summary(fun = mean, geom = "point", size=3, color='black')+
+  xlab('Gene')+
+  ylab('Polyacetylene mean')+
+  ggtitle('Polyacetylene vs Gene')
+
+gene_plots
+```
+
+#### Summarizing bar plots
+
+```{r 5}
+carrot_variety_bar + carrot_parts_bar + agrobacteria_bar + gene_bar
+```
+
+#### Summarizing point plots
+
+```{r 6}
+carrot_variety_plots + carrot_parts_plots + agrobacteria_plots + gene_plots
+```
+
+#### Linear regression model
+
+```{r}
+smp_siz = floor(0.75*nrow(carrot_df))
+set.seed(123)
+train_ind = sample(seq_len(nrow(carrot_df)),size = smp_siz)
+train = carrot_df[train_ind,]
+test = carrot_df[-train_ind,]
+linear_model = lm(carrot_df$GC_MS_polyacetylene_percentage ~ carrot_df$carrot_variety + carrot_df$carrot_parts + carrot_df$agrobacteria_type + carrot_df$gene, data = train)
+summary(linear_model)
+```
+
+#### Prediction in R using linear regression
+
+```{r}
+precentage_prediction = predict(linear_model, newdata = test)
+actuals_preds <- data.frame(cbind(actuals=carrot_df$GC_MS_polyacetylene_percentage, predicteds=precentage_prediction))
+actuals_preds
+```
+
+
+
+
